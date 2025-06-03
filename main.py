@@ -17,8 +17,8 @@ class PDF2PNGConverter:
         self.root.geometry("600x500")
         self.root.minsize(500, 400)
         
-        # デフォルトの出力先はデスクトップの"output"フォルダ
-        self.output_folder = os.path.join(os.path.expanduser("~"), "Desktop", "output")
+        # 初期状態では出力先は未設定
+        self.output_folder = None
         self.worker = None
         
         self.setup_gui()
@@ -65,8 +65,9 @@ class PDF2PNGConverter:
         self.file_list_frame = FileListFrame(main_frame)
         self.file_list_frame.pack(fill="both", expand=True, pady=10)
         
-        # 出力先ラベル
-        self.output_label = ttk.Label(main_frame, text=f"出力先: {self.output_folder}")
+        # 出力先ラベル - 初期状態ではガイダンスメッセージを表示
+        output_text = "出力フォルダを選択してください。PDFをドラッグアンドドロップすると、自動で出力フォルダが設定されます。"
+        self.output_label = ttk.Label(main_frame, text=output_text, wraplength=580)
         self.output_label.pack(fill="x", pady=5, anchor="w")
         
         # 変換ボタンと進捗フレーム
@@ -148,7 +149,7 @@ class PDF2PNGConverter:
                 messagebox.showwarning(
                     "警告", 
                     f"PDFファイルのフォルダ（{parent_dir}）に書き込み権限がありません。\n"
-                    "デフォルトの出力先を使用します。"
+                    "出力先フォルダを手動で選択してください。"
                 )
                 return False
             
@@ -208,6 +209,12 @@ class PDF2PNGConverter:
             messagebox.showwarning("警告", "変換するPDFファイルが選択されていません。")
             return
         
+        # 出力先フォルダが設定されているか確認
+        if not self.output_folder:
+            messagebox.showwarning("警告", "出力先フォルダが設定されていません。\n"
+                                 "PDFファイルをドラッグアンドドロップするか、「出力先選択」ボタンで選択してください。")
+            return
+        
         # 出力先フォルダの存在確認と作成
         if not os.path.exists(self.output_folder):
             try:
@@ -264,9 +271,15 @@ class PDF2PNGConverter:
         try:
             self.file_list_frame.clear_files()  # ファイルリストをクリア
             self.progress_frame.reset()  # 進捗バーもリセット
-            print("変換完了後、ファイルリストをクリアしました")
+            
+            # 出力先表示をリセット
+            self.output_folder = None
+            output_text = "出力フォルダを選択してください。PDFをドラッグアンドドロップすると、自動で出力フォルダが設定されます。"
+            self.output_label.config(text=output_text)
+            
+            print("変換完了後、ファイルリストと出力先表示をリセットしました")
         except Exception as e:
-            print(f"ファイルリストのクリア中にエラーが発生しました: {str(e)}")
+            print(f"リセット処理中にエラーが発生しました: {str(e)}")
     
     def run(self):
         """アプリケーションの実行"""
