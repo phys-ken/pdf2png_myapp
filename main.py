@@ -259,6 +259,14 @@ class PDF2PNGConverter:
         result = messagebox.askquestion("変換完了", f"{message}\n\n出力フォルダを開きますか？")    
         if result == "yes":
             webbrowser.open(self.output_folder)
+        
+        # 変換完了後、ファイルリストをクリアして次の処理に備える
+        try:
+            self.file_list_frame.clear_files()  # ファイルリストをクリア
+            self.progress_frame.reset()  # 進捗バーもリセット
+            print("変換完了後、ファイルリストをクリアしました")
+        except Exception as e:
+            print(f"ファイルリストのクリア中にエラーが発生しました: {str(e)}")
     
     def run(self):
         """アプリケーションの実行"""
