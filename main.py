@@ -4,6 +4,7 @@ from tkinter import ttk, filedialog, messagebox
 from tkinterdnd2 import DND_FILES, TkinterDnD
 import threading
 import webbrowser
+from datetime import datetime
 from gui_components import DragDropFrame, ProgressFrame, FileListFrame, ConversionWorker
 
 class PDF2PNGConverter:
@@ -16,6 +17,7 @@ class PDF2PNGConverter:
         self.root.geometry("600x500")
         self.root.minsize(500, 400)
         
+        # デフォルトの出力先はデスクトップの"output"フォルダ
         self.output_folder = os.path.join(os.path.expanduser("~"), "Desktop", "output")
         self.worker = None
         
@@ -117,9 +119,66 @@ class PDF2PNGConverter:
                  background=[('active', '#005fa3'), ('!disabled', '#0078D7')],
                  foreground=[('!disabled', 'white')])
     
+    def update_output_folder(self, file_paths):
+        """最初のファイルのディレクトリに、タイムスタンプ付きoutputフォルダを作成して設定"""
+        if not file_paths:
+            return False
+        
+        try:
+            # リストの場合と文字列の場合の両方に対応
+            first_file = file_paths[0] if isinstance(file_paths, list) else file_paths
+            
+            # 文字列をパースする必要がある場合（DnDで渡される場合など）
+            if isinstance(first_file, str) and '{' in first_file:
+                # DnDからのパスリストをパース
+                first_file = first_file.strip('{}').split('} {')[0]
+            
+            # ファイルの親ディレクトリを取得
+            parent_dir = os.path.dirname(os.path.abspath(first_file))
+            
+            # 現在時刻からフォルダ名を作成
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            output_folder_name = f"output_{timestamp}"
+            
+            # 出力先フォルダパスを作成
+            new_output_folder = os.path.join(parent_dir, output_folder_name)
+            
+            # 親ディレクトリに書き込み権限があるか確認
+            if not os.access(parent_dir, os.W_OK):
+                messagebox.showwarning(
+                    "警告", 
+                    f"PDFファイルのフォルダ（{parent_dir}）に書き込み権限がありません。\n"
+                    "デフォルトの出力先を使用します。"
+                )
+                return False
+            
+            # 同名フォルダが既に存在するか確認（念のため）
+            if os.path.exists(new_output_folder):
+                # 既存のフォルダがある場合はそのまま使用
+                pass
+            
+            # 出力先フォルダを更新
+            self.output_folder = new_output_folder
+            
+            # GUIを更新
+            if hasattr(self, 'output_label'):
+                self.output_label.config(text=f"出力先: {self.output_folder}")
+            
+            return True
+        
+        except Exception as e:
+            print(f"出力先フォルダの更新中にエラーが発生しました: {str(e)}")
+            # エラーが発生した場合はデフォルトのフォルダを維持
+            return False
+    
     def add_files(self, file_paths):
         """ファイルをリストに追加"""
-        self.file_list_frame.add_files(file_paths)
+        if file_paths:
+            # 最初のファイルのディレクトリを出力先として設定
+            self.update_output_folder(file_paths)
+            
+            # ファイルリストに追加
+            self.file_list_frame.add_files(file_paths)
     
     def select_files(self):
         """ファイル選択ダイアログを表示"""
@@ -128,6 +187,10 @@ class PDF2PNGConverter:
             filetypes=[("PDF files", "*.pdf")]
         )
         if files:
+            # 最初のファイルのディレクトリを出力先として設定
+            self.update_output_folder(files)
+            
+            # ファイルリストに追加
             self.add_files(files)
     
     def select_output_folder(self):
@@ -149,6 +212,7 @@ class PDF2PNGConverter:
         if not os.path.exists(self.output_folder):
             try:
                 os.makedirs(self.output_folder)
+                print(f"出力先フォルダを作成しました: {self.output_folder}")
             except Exception as e:
                 messagebox.showerror("エラー", f"出力先フォルダの作成に失敗しました。\n{str(e)}")
                 return
