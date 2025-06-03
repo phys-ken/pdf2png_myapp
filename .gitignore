@@ -20,6 +20,7 @@ wheels/
 *.egg
 MANIFEST
 PDF2PNG_Converter.spec
+*.spec
 
 # 仮想環境
 venv/
