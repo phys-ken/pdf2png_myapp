@@ -6,7 +6,6 @@ __pycache__/
 .Python
 build/
 develop-eggs/
-dist/
 downloads/
 eggs/
 .eggs/
@@ -20,6 +19,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+PDF2PNG_Converter.spec
 
 # 仮想環境
 venv/
