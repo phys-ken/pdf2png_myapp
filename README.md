@@ -26,7 +26,7 @@
 このプロジェクトは MIT ライセンスの下で公開されています。ただし、使用している各ライブラリには個別のライセンスが適用されます。詳細は [LICENSES.md](LICENSES.md) を参照してください。
 
 ## ドキュメント
-詳しい使い方や設定方法については、[ユーザーマニュアル](https://phys-ken.github.io/pdf2png_myapp/docs/user-manual.md)を参照してください。
+詳しい使い方や設定方法については、[ユーザーマニュアル](docs/user-manual.md)を参照してください。
 
 ## リリース
 実行可能ファイルは[GitHubリリースページ](https://github.com/phys-ken/pdf2png_myapp/releases)からダウンロードできます。
